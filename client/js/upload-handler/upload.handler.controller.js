@@ -334,7 +334,11 @@ qq.UploadHandlerController = function(o, namespace) {
 
         open: function(id, chunkIdx) {
             if (chunkIdx == null) {
-                connectionManager._waiting.push(id);
+                var alreadyInWaiting = qq.indexOf(connectionManager._waiting, id);
+                var alreadyInOpen = qq.indexOf(connectionManager._open, id);
+                if (alreadyInWaiting === -1 && alreadyInOpen === -1) {
+                    connectionManager._waiting.push(id);
+                }
             }
 
             if (connectionManager.available()) {
