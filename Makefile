@@ -130,6 +130,13 @@ s3-files = \
 	$(core-files) \
 	$(s3-files-only)
 
+s3-files-with-worker-only = \
+	$(build-out-dir)/s3.fine-uploader.worker-inline.js
+
+s3-files-with-worker = \
+	$(s3-files) \
+	$(s3-files-with-worker-only)
+
 s3-ui-files-only = \
 	$(js-src-dir)/s3/uploader.js
 
@@ -178,6 +185,7 @@ all-core-files = \
 	$(core-files) \
 	$(traditional-files-only) \
 	$(s3-files-only) \
+	$(s3-files-with-worker-only) \
 	$(azure-files-only)
 
 all-core-jquery-files = \
@@ -189,6 +197,7 @@ all-files = \
 	$(traditional-files-only) \
 	$(ui-files) \
 	$(s3-files-only) \
+	$(s3-files-with-worker-only) \
 	$(s3-ui-files-only) \
 	$(azure-files-only) \
 	$(azure-ui-files-only)
@@ -217,6 +226,7 @@ _build:
 	$(npm-bin)/cleancss --source-map $@/fine-uploader-new.css -o $@/fine-uploader-new.min.css
 
 uglify = $(npm-bin)/uglifyjs -b --preamble $(preamble) -e window:global -p relative --source-map-include-sources
+uglify-worker = $(npm-bin)/uglifyjs -c -m --preamble $(preamble) -p relative --source-map-include-sources
 uglify-min = $(npm-bin)/uglifyjs -c -m --preamble $(preamble) -e window:global -p relative --source-map-include-sources
 
 build-dnd-standalone: _build
@@ -243,11 +253,21 @@ build-ui-traditional-jquery: _build
 build-ui-traditional-jquery-min: _build
 	$(uglify-min) $(traditional-ui-jquery-files) -o $(build-out-dir)/jquery.fine-uploader.min.js --source-map $(build-out-dir)/jquery.fine-uploader.min.js.map
 
+_build-s3-inline-worker: _build
+	$(uglify-worker) $(js-src-dir)/s3/worker.start.js $(cryptojs-files) $(js-src-dir)/s3/worker.end.js -o $(build-out-dir)/s3.fine-uploader.worker.min.js --source-map $(build-out-dir)/s3.fine-uploader.worker.js.map
+	node workerToInline $(build-out-dir)/s3.fine-uploader.worker.min.js $(build-out-dir)/s3.fine-uploader.worker-inline.js
+
 build-core-s3: _build
 	$(uglify) $(s3-files) -o $(build-out-dir)/s3.fine-uploader.core.js --source-map $(build-out-dir)/s3.fine-uploader.core.js.map
 
 build-core-s3-min: _build
 	$(uglify-min) $(s3-files) -o $(build-out-dir)/s3.fine-uploader.core.min.js --source-map $(build-out-dir)/s3.fine-uploader.core.min.js.map
+
+build-s3-files-with-worker: _build _build-s3-inline-worker
+	$(uglify) $(s3-files-with-worker) -o $(build-out-dir)/s3.fine-uploader.core.worker.js --source-map $(build-out-dir)/s3.fine-uploader.core.worker.js.map
+
+build-s3-files-with-worker-min: _build _build-s3-inline-worker
+	$(uglify-min) $(s3-files-with-worker) -o $(build-out-dir)/s3.fine-uploader.core.worker.min.js --source-map $(build-out-dir)/s3.fine-uploader.core.worker.min.js.map
 
 build-ui-s3: _build
 	$(uglify) $(s3-ui-files) -o $(build-out-dir)/s3.fine-uploader.js --source-map $(build-out-dir)/s3.fine-uploader.js.map
@@ -279,16 +299,16 @@ build-ui-azure-jquery: _build
 build-ui-azure-jquery-min: _build
 	$(uglify-min) $(azure-ui-jquery-files) -o $(build-out-dir)/azure.jquery.fine-uploader.min.js -e window:global --source-map $(build-out-dir)/azure.jquery.fine-uploader.min.js.map
 
-build-all-core: _build
+build-all-core: _build _build-s3-inline-worker
 	$(uglify) $(all-core-files) -o $(build-out-dir)/all.fine-uploader.core.js --source-map $(build-out-dir)/all.fine-uploader.core.js.map 
 
-build-all-core-min: _build
+build-all-core-min: _build _build-s3-inline-worker
 	$(uglify-min) $(all-core-files) -o $(build-out-dir)/all.fine-uploader.core.min.js -e window:global --source-map $(build-out-dir)/all.fine-uploader.core.min.js.map
 
-build-all-ui: _build
+build-all-ui: _build _build-s3-inline-worker
 	$(uglify) $(all-files) -o $(build-out-dir)/all.fine-uploader.js --source-map $(build-out-dir)/all.fine-uploader.js.map 
 
-build-all-ui-min: _build
+build-all-ui-min: _build _build-s3-inline-worker
 	$(uglify-min) $(all-files) -o $(build-out-dir)/all.fine-uploader.min.js --source-map $(build-out-dir)/all.fine-uploader.min.js.map
 
 build: \
@@ -306,6 +326,8 @@ build: \
 	build-ui-s3-min \
 	build-ui-s3-jquery \
 	build-ui-s3-jquery-min \
+	build-s3-files-with-worker \
+	build-s3-files-with-worker-min \
 	build-core-azure \
 	build-core-azure-min \
 	build-ui-azure \

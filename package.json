@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "clean-css-cli": "4.0.8",
+    "js-string-escape": "^1.0.1",
     "jscs": "3.0.7",
     "jshint": "2.9.4",
     "karma": "1.5.0",

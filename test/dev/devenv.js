@@ -95,7 +95,9 @@ qq(window).attach("load", function() {
             accessKey: "AKIAIXVR6TANOGNBGANQ"
         },
         signature: {
-            endpoint: "/test/dev/handlers/vendor/fineuploader/php-s3-server/endpoint.php"
+            endpoint: "/test/dev/handlers/vendor/fineuploader/php-s3-server/endpoint.php",
+            version: 4,
+            useWorker: true
         },
         uploadSuccess: {
             endpoint: "/test/dev/handlers/vendor/fineuploader/php-s3-server/endpoint.php?success"
