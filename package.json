@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "clean-css": "3.4.19",
+    "js-string-escape": "^1.0.1",
     "jscs": "3.0.7",
     "jshint": "2.9.2",
     "karma": "1.1.2",
