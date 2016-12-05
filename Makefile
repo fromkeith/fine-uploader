@@ -391,6 +391,12 @@ endif
 	cp $(build-out-dir)/$(PUB-SUBDIR).min* $(build-out-dir)/$(PUB-SUBDIR).js* $(pub-dir)/$(PUB-SUBDIR)
 	cp $(build-out-dir)/fine-uploader*.css* $(pub-dir)/$(PUB-SUBDIR)
 
+copy-s3-worker-to-dist:
+	cp $(build-out-dir)/$(PUB-SUBDIR).core.worker.js* \
+		$(build-out-dir)/$(PUB-SUBDIR).core.worker.min* \
+		$(build-out-dir)/$(PUB-SUBDIR).worker.min* \
+		$(pub-dir)/$(PUB-SUBDIR)/
+
 copy-dnd:
 	mkdir -p $(pub-dir)/dnd
 	cp $(build-out-dir)/dnd*.* $(pub-dir)/dnd
@@ -405,6 +411,7 @@ copy-traditional-jquery-dist:
 
 copy-s3-dist:
 	make copy-build-to-dist PUB-SUBDIR=s3.fine-uploader
+	make copy-s3-worker-to-dist PUB-SUBDIR=s3.fine-uploader
 
 copy-s3-jquery-dist:
 	make copy-build-to-dist PUB-SUBDIR=s3.jquery.fine-uploader
