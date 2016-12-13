@@ -8,7 +8,9 @@ function doTask(body, cb) {
     reader.onloadend = function(e) {
         if (e.target.readyState === FileReader.DONE) {
             if (e.target.error) {
-                cb(e.target.error);
+                // report the error.
+                // first stringify->parse it as postMessage will fail to clone the error itself.
+                cb(JSON.parse(JSON.stringify(e.target.error, null, 2)));
             }
             else {
                 var wordArray = qq.CryptoJS.lib.WordArray.create(e.target.result);
