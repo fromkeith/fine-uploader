@@ -453,7 +453,6 @@ endif
 publish: \
 	clean \
 	build \
-	zip \
 	setup-dist \
 	copy-dnd \
 	copy-traditional-dist \
@@ -462,9 +461,9 @@ publish: \
 	copy-s3-jquery-dist \
 	copy-azure-dist \
 	copy-azure-jquery-dist \
-	copy-all-dist \
-	tag-release \
-	push-to-npm
+	copy-all-dist #\
+	#tag-release \
+	#push-to-npm
 
 setup-dev:
 	(cd test/dev/handlers; curl -sS https://getcomposer.org/installer | php; php composer.phar install)
