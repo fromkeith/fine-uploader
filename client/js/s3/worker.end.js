@@ -3,7 +3,10 @@
  * Here we define the actual task handling and communication.
  */
 
+/* globals postMessage: true */
+/* globals onmessage: true */
 function doTask(body, cb) {
+    "use strict";
     var reader = new FileReader();
     reader.onloadend = function(e) {
         if (e.target.readyState === FileReader.DONE) {
@@ -21,6 +24,7 @@ function doTask(body, cb) {
     reader.readAsArrayBuffer(body);
 }
 onmessage = function (e) {
+    "use strict";
     doTask(e.data.file, function (err, str) {
         postMessage({err: err, resp: str, id: e.data.id});
     });
