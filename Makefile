@@ -4,6 +4,7 @@ version=$(shell node -pe "require('./package.json').version")
 dist-out-dir = _dist
 pub-dir = $(dist-out-dir)/$(version)
 
+npm-bin = $(shell npm bin)
 
 build-out-dir = _build
 src-dir = client
