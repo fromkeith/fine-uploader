@@ -118,6 +118,7 @@ s3-files-only = \
 	$(js-src-dir)/s3/util.js \
 	$(js-src-dir)/non-traditional-common/uploader.basic.api.js \
 	$(js-src-dir)/s3/uploader.basic.js \
+	$(js-src-dir)/s3/request-signer.worker-manager.js \
 	$(js-src-dir)/s3/request-signer.js \
 	$(js-src-dir)/uploadsuccess.ajax.requester.js \
 	$(js-src-dir)/s3/multipart.initiate.ajax.requester.js \
