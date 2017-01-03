@@ -21,6 +21,7 @@ module.exports = function(config, options) {
             path.resolve("test/static/local/blob-maker.js"),
             path.resolve("test/static/third-party/q/q-1.0.1.js"),
             path.resolve("node_modules/pica/dist/pica.js"),
+            path.resolve("node_modules/timemachine/timemachine.min.js"),
             path.resolve("test/static/local/helpme.js"),
             path.resolve("test/unit/**/*.js")
         ],
