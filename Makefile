@@ -118,18 +118,12 @@ s3-files-only = \
 	$(js-src-dir)/s3/multipart.complete.ajax.requester.js \
 	$(js-src-dir)/s3/multipart.abort.ajax.requester.js \
 	$(js-src-dir)/s3/s3.xhr.upload.handler.js \
-	$(js-src-dir)/s3/s3.form.upload.handler.js
+	$(js-src-dir)/s3/s3.form.upload.handler.js \
+	$(build-out-dir)/s3.fine-uploader.worker-inline.js
 
 s3-files = \
 	$(core-files) \
 	$(s3-files-only)
-
-s3-files-with-worker-only = \
-	$(build-out-dir)/s3.fine-uploader.worker-inline.js
-
-s3-files-with-worker = \
-	$(s3-files) \
-	$(s3-files-with-worker-only)
 
 s3-ui-files-only = \
 	$(js-src-dir)/s3/uploader.js
@@ -179,7 +173,6 @@ all-core-files = \
 	$(core-files) \
 	$(traditional-files-only) \
 	$(s3-files-only) \
-	$(s3-files-with-worker-only) \
 	$(azure-files-only)
 
 all-core-jquery-files = \
@@ -191,7 +184,6 @@ all-files = \
 	$(traditional-files-only) \
 	$(ui-files) \
 	$(s3-files-only) \
-	$(s3-files-with-worker-only) \
 	$(s3-ui-files-only) \
 	$(azure-files-only) \
 	$(azure-ui-files-only)
@@ -251,17 +243,11 @@ _build-s3-inline-worker: _build
 	$(uglify-worker) $(js-src-dir)/s3/worker.start.js $(cryptojs-files) $(js-src-dir)/s3/worker.end.js -o $(build-out-dir)/s3.fine-uploader.worker.min.js --source-map $(build-out-dir)/s3.fine-uploader.worker.js.map
 	node workerToInline $(build-out-dir)/s3.fine-uploader.worker.min.js $(build-out-dir)/s3.fine-uploader.worker-inline.js
 
-build-core-s3: _build
+build-core-s3: _build _build-s3-inline-worker
 	$(uglify) $(s3-files) -o $(build-out-dir)/s3.fine-uploader.core.js --source-map $(build-out-dir)/s3.fine-uploader.core.js.map
 
-build-core-s3-min: _build
+build-core-s3-min: _build _build-s3-inline-worker
 	$(uglify-min) $(s3-files) -o $(build-out-dir)/s3.fine-uploader.core.min.js --source-map $(build-out-dir)/s3.fine-uploader.core.min.js.map
-
-build-s3-files-with-worker: _build _build-s3-inline-worker
-	$(uglify) $(s3-files-with-worker) -o $(build-out-dir)/s3.fine-uploader.core.worker.js --source-map $(build-out-dir)/s3.fine-uploader.core.worker.js.map
-
-build-s3-files-with-worker-min: _build _build-s3-inline-worker
-	$(uglify-min) $(s3-files-with-worker) -o $(build-out-dir)/s3.fine-uploader.core.worker.min.js --source-map $(build-out-dir)/s3.fine-uploader.core.worker.min.js.map
 
 build-ui-s3: _build
 	$(uglify) $(s3-ui-files) -o $(build-out-dir)/s3.fine-uploader.js --source-map $(build-out-dir)/s3.fine-uploader.js.map
@@ -320,8 +306,6 @@ build: \
 	build-ui-s3-min \
 	build-ui-s3-jquery \
 	build-ui-s3-jquery-min \
-	build-s3-files-with-worker \
-	build-s3-files-with-worker-min \
 	build-core-azure \
 	build-core-azure-min \
 	build-ui-azure \
@@ -392,12 +376,6 @@ endif
 	cp $(build-out-dir)/$(PUB-SUBDIR).min* $(build-out-dir)/$(PUB-SUBDIR).js* $(pub-dir)/$(PUB-SUBDIR)
 	cp $(build-out-dir)/fine-uploader*.css* $(pub-dir)/$(PUB-SUBDIR)
 
-copy-s3-worker-to-dist:
-	cp $(build-out-dir)/$(PUB-SUBDIR).core.worker.js* \
-		$(build-out-dir)/$(PUB-SUBDIR).core.worker.min* \
-		$(build-out-dir)/$(PUB-SUBDIR).worker.min* \
-		$(pub-dir)/$(PUB-SUBDIR)/
-
 copy-dnd:
 	mkdir -p $(pub-dir)/dnd
 	cp $(build-out-dir)/dnd*.* $(pub-dir)/dnd
@@ -412,7 +390,6 @@ copy-traditional-jquery-dist:
 
 copy-s3-dist:
 	make copy-build-to-dist PUB-SUBDIR=s3.fine-uploader
-	make copy-s3-worker-to-dist PUB-SUBDIR=s3.fine-uploader
 
 copy-s3-jquery-dist:
 	make copy-build-to-dist PUB-SUBDIR=s3.jquery.fine-uploader
