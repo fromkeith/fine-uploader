@@ -42,7 +42,7 @@ qq.s3.RequestSignerWorkerManager = function (o) {
                 // Prevent the event from bubbling
                 e.preventDefault();
                 // log the error, and fail any pending promises.
-                options.log('Worker encountered an error. Disabling. ' + e.message, "warn");
+                options.log("Worker encountered an error. Disabling. " + e.message, "warn");
                 _worker = null;
                 var outstandingRequests = Object.keys(_workerPromises),
                     i;
