@@ -1,7 +1,8 @@
 /* globals qq, CryptoJS */
 
-
-
+/**
+ * Manages creation and communication of s3 signature workers.
+ */
 qq.s3.RequestSignerWorkerManager = function (o) {
     "use strict";
     var _worker = null,
@@ -12,26 +13,25 @@ qq.s3.RequestSignerWorkerManager = function (o) {
         };
     qq.extend(options, o, true);
 
-
     function init() {
         var workerUrl;
         switch (typeof options.workerUrl) {
-        case "string":
-            if (options.workerUrl !== "inline") {
-                workerUrl = options.workerUrl;
-            } else {
-                if (!qq.s3.createS3InlineWorkerUrl) {
-                    qq.Error("Missing inline s3 worker");
-                    return;
+            case "string":
+                if (options.workerUrl !== "inline") {
+                    workerUrl = options.workerUrl;
+                } else {
+                    if (!qq.s3.createS3InlineWorkerUrl) {
+                        qq.Error("Missing inline s3 worker");
+                        return;
+                    }
+                    workerUrl = qq.s3.createS3InlineWorkerUrl();
                 }
-                workerUrl = qq.s3.createS3InlineWorkerUrl();
-            }
-            break;
-        case "function":
-            workerUrl = options.workerUrl();
-            break;
-        default:
-            break;
+                break;
+            case "function":
+                workerUrl = options.workerUrl();
+                break;
+            default:
+                break;
         }
         if (!workerUrl) {
             return;
