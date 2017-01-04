@@ -162,17 +162,17 @@ describe("S3 serverless upload tests", function() {
                                 if (which >= answers.length) {
                                     return;
                                 }
-                                assert.equal(fileTestHelper.getRequests().length, which + 1, "Wrong # of requests");
                                 var request = fileTestHelper.getRequests()[which];
                                 var checkHeaders = Object.keys(answers[which].expect.headers);
                                 for (var i = 0; i < checkHeaders.length; i++) {
-                                    console.log(checkHeaders[i], request.requestHeaders[checkHeaders[i]])
                                     assert.equal(request.requestHeaders[checkHeaders[i]], answers[which].expect.headers[checkHeaders[i]]);
                                 }
                                 if (answers[which].expect.body) {
                                     assert.equal(request.requestBody, answers[which].expect.body);
                                 }
-                                request.respond(200, answers[which].response.headers, answers[which].response.body);
+                                if (answers[which].response) {
+                                    request.respond(200, answers[which].response.headers, answers[which].response.body);
+                                }
                                 setTimeout(handleChunk(which + 1), 100);
                             };
                         }
@@ -196,7 +196,7 @@ describe("S3 serverless upload tests", function() {
                                 },
                                 signature: {
                                     version: 4,
-                                    workerUrl: ''
+                                    workerUrl: 'inline'
                                 },
                                 objectProperties: {
                                     key: function () {
@@ -258,6 +258,57 @@ describe("S3 serverless upload tests", function() {
                                 }
                             });
                         doTest(uploader, chunkAnswers);
+                    });
+                    it("test simple time-locked upload using invalid worker - defaults back and works", function(done) {
+                        // we need to lock the time, so our signature is constant
+                        timemachine.config({
+                            timestamp: 1483420379000 //'January 03, 2017 00:12:59'
+                        });
+                        var testExpiration = new Date(Date.now() + 10000),
+                            uploader = new qq.s3.FineUploaderBasic({
+                                request: {
+                                    endpoint: testS3Endpoint
+                                },
+                                signature: {
+                                    version: 4,
+                                    workerUrl: 'http://localhost:3000/file.not.exists.js'
+                                },
+                                objectProperties: {
+                                    key: function () {
+                                        return 'test-key';
+                                    }
+                                },
+                                chunking: {
+                                    enabled: true,
+                                    partSize: 1024
+                                },
+                                credentials: {
+                                    accessKey: testAccessKey,
+                                    secretKey: testSecretKey,
+                                    expiration: testExpiration
+                                },
+                                retry: { // turn on retry as our worker fails asyncrounously
+                                    enableAuto: true,
+                                    autoAttemptDelay: 0,
+                                    maxAutoAttempts: 1
+                                },
+                                callbacks: {
+                                    onAllComplete: function(succeeded, failed) {
+                                        assert.equal(failed.length, 0);
+                                        timemachine.reset();
+                                        done();
+                                    },
+                                }
+                            });
+                        var answers = JSON.parse(JSON.stringify(chunkAnswers));
+                        answers.splice(1, 0, {
+                            expect: {
+                                headers: {
+                                    'x-amz-date': undefined
+                                }
+                            }
+                        });
+                        doTest(uploader, answers);
                     });
                     it("test simple time-locked upload using custom worker to sign", function(done) {
                         // we need to lock the time, so our signature is constant
