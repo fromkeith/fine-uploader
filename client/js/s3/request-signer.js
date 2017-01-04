@@ -269,7 +269,8 @@ qq.s3.RequestSigner = function(o) {
     credentialsProvider = options.signatureSpec.credentialsProvider;
     if (options.signatureSpec.workerUrl !== null) {
         workerManager = new qq.s3.RequestSignerWorkerManager({
-            workerUrl: options.signatureSpec.workerUrl
+            workerUrl: options.signatureSpec.workerUrl,
+            log: options.log,
         });
     }
 
