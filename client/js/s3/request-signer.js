@@ -34,7 +34,7 @@ qq.s3.RequestSigner = function(o) {
                 endpoint: null,
                 customHeaders: {},
                 version: 2,
-                useWorker: false
+                workerUrl: null
             },
             maxConnections: 3,
             endpointStore: {},
@@ -46,6 +46,7 @@ qq.s3.RequestSigner = function(o) {
             log: function(str, level) {}
         },
         credentialsProvider,
+        workerManager,
 
         generateHeaders = function(signatureConstructor, signature, promise) {
             var headers = signatureConstructor.getHeaders();
@@ -153,52 +154,18 @@ qq.s3.RequestSigner = function(o) {
             },
 
             getEncodedHashedPayload: function(body) {
-                var promise = new qq.Promise(),
-                    reader,
-                    self = this;
-
+                var promise,
+                    reader;
                 if (qq.isBlob(body)) {
-                    // Only if a worker is requested will we load it.
-                    // We will fallback to the inline reader if the worker
-                    // fails to load.
-                    if (options.signatureSpec.useWorker) {
-                        if (!this._worker) {
-                            try {
-                                // allow the worker path to be overwritten.. Eg. we aren't using an inline worker.
-                                var workerUrl = options.signatureSpec.useWorker;
-                                if (workerUrl === true) {
-                                    if (!qq.s3.worker) {
-                                        throw new Error("Missing inline s3 worker.");
-                                    }
-                                    workerUrl = qq.s3.worker();
-                                }
-                                this._worker = new Worker(workerUrl);
-                                this._workerPromises = {};
-                                this._worker.onmessage = function (e) {
-                                    if (!self._workerPromises[e.data.id]) {
-                                        options.log("Worker returned a result for an request we dont know about.");
-                                        return;
-                                    }
-                                    if (e.data.err) {
-                                        self._workerPromises[e.data.id].failure(e.data.err);
-                                    } else {
-                                        self._workerPromises[e.data.id].success(e.data.resp);
-                                    }
-                                    delete self._workerPromises[e.data.id];
-                                };
-                            } catch (ex) {
-                                // worker is not supported or invalid
-                                options.log("Worker failed to be created. Defaulting back to main thread processing.", ex);
-                                options.signatureSpec.useWorker = false;
-                            }
-                        }
-                        if (this._worker) {
-                            var task = {file: body, id: qq.getUniqueId()};
-                            this._workerPromises[task.id] = promise;
-                            this._worker.postMessage(task);
+                    // We will fallback to the inline reader if the worker was
+                    // not loaded correctly
+                    if (workerManager) {
+                        promise = workerManager.generateSignature(body);
+                        if (promise !== null) {
                             return promise;
                         }
                     }
+                    promise = new qq.Promise();
                     reader = new FileReader();
                     reader.onloadend = function(e) {
                         if (e.target.readyState === FileReader.DONE) {
@@ -212,12 +179,11 @@ qq.s3.RequestSigner = function(o) {
                         }
                     };
                     reader.readAsArrayBuffer(body);
+                    return promise;
                 }
-                else {
-                    body = body || "";
-                    promise.success(qq.CryptoJS.SHA256(body).toString());
-                }
-
+                promise = new qq.Promise();
+                body = body || "";
+                promise.success(qq.CryptoJS.SHA256(body).toString());
                 return promise;
             },
 
@@ -301,6 +267,12 @@ qq.s3.RequestSigner = function(o) {
 
     qq.extend(options, o, true);
     credentialsProvider = options.signatureSpec.credentialsProvider;
+    if (options.signatureSpec.workerUrl !== null) {
+        workerManager = new qq.s3.RequestSignerWorkerManager({
+            workerUrl: options.signatureSpec.workerUrl,
+            log: options.log,
+        });
+    }
 
     function handleSignatureReceived(id, xhrOrXdr, isError) {
         var responseJson = xhrOrXdr.responseText,
@@ -435,7 +407,6 @@ qq.s3.RequestSigner = function(o) {
         }
 
         endOfUrl = requestInfo.key + "?" + endOfUrl;
-
         if (version === 4) {
             v4.getEncodedHashedPayload(requestInfo.content).then(function(hashedContent) {
                 requestInfo.headers["x-amz-content-sha256"] = hashedContent;

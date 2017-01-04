@@ -32,7 +32,8 @@ cryptojs-files = \
 	$(js-3rdparty-src-dir)/crypto-js/lib-typedarrays.js
 
 jquery-files = \
-	$(js-src-dir)/jquery-plugin.js
+	$(js-src-dir)/jquery-plugin.js \
+	$(js-src-dir)/jquery-dnd.js
 
 dnd-files-only = \
 	$(js-src-dir)/dnd.js
@@ -44,10 +45,6 @@ dnd-files = \
 	$(js-src-dir)/features.js \
 	$(js-src-dir)/promise.js \
 	$(js-src-dir)/dnd.js
-
-dnd-jquery-files = \
-	$(jquery-files) \
-	$(dnd-files)
 
 core-files = \
 	$(js-src-dir)/util.js \
@@ -71,7 +68,6 @@ core-files = \
 	$(js-src-dir)/image-support/megapix-image.js \
 	$(js-src-dir)/image-support/image.js \
 	$(js-src-dir)/image-support/exif.js \
-	$(js-src-dir)/identify.js \
 	$(js-src-dir)/identify.js \
 	$(js-src-dir)/image-support/validation.image.js \
 	$(js-src-dir)/session.js \
@@ -121,13 +117,15 @@ s3-files-only = \
 	$(js-src-dir)/s3/util.js \
 	$(js-src-dir)/non-traditional-common/uploader.basic.api.js \
 	$(js-src-dir)/s3/uploader.basic.js \
+	$(js-src-dir)/s3/request-signer.worker-manager.js \
 	$(js-src-dir)/s3/request-signer.js \
 	$(js-src-dir)/uploadsuccess.ajax.requester.js \
 	$(js-src-dir)/s3/multipart.initiate.ajax.requester.js \
 	$(js-src-dir)/s3/multipart.complete.ajax.requester.js \
 	$(js-src-dir)/s3/multipart.abort.ajax.requester.js \
 	$(js-src-dir)/s3/s3.xhr.upload.handler.js \
-	$(js-src-dir)/s3/s3.form.upload.handler.js
+	$(js-src-dir)/s3/s3.form.upload.handler.js \
+	$(build-out-dir)/s3.fine-uploader.worker-inline.js
 
 s3-files = \
 	$(core-files) \
@@ -260,10 +258,10 @@ _build-s3-inline-worker: _build
 	$(uglify-worker) $(js-src-dir)/s3/worker.start.js $(cryptojs-files) $(js-src-dir)/s3/worker.end.js -o $(build-out-dir)/s3.fine-uploader.worker.min.js --source-map $(build-out-dir)/s3.fine-uploader.worker.js.map
 	node workerToInline $(build-out-dir)/s3.fine-uploader.worker.min.js $(build-out-dir)/s3.fine-uploader.worker-inline.js
 
-build-core-s3: _build
+build-core-s3: _build _build-s3-inline-worker
 	$(uglify) $(s3-files) -o $(build-out-dir)/s3.fine-uploader.core.js --source-map $(build-out-dir)/s3.fine-uploader.core.js.map
 
-build-core-s3-min: _build
+build-core-s3-min: _build _build-s3-inline-worker
 	$(uglify-min) $(s3-files) -o $(build-out-dir)/s3.fine-uploader.core.min.js --source-map $(build-out-dir)/s3.fine-uploader.core.min.js.map
 
 build-s3-files-with-worker: _build _build-s3-inline-worker

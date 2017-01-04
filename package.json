@@ -57,6 +57,7 @@
     "mocha": "3.0.1",
     "node-static": "0.7.8 ",
     "pica": "latest",
+    "timemachine": "^0.2.8",
     "uglify-js": "2.7.0"
   },
   "scripts": {

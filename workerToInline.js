@@ -23,7 +23,7 @@ fs.readFile(source, 'UTF-8', function (err, data) {
     let sourceCode = jsStringEscape(data);
 
     let outCode = `
-        qq.s3.worker = function () {
+        qq.s3.createS3InlineWorkerUrl = function () {
             return URL.createObjectURL(new Blob(["${sourceCode}"], {type: "application/javascript"}));
         };
     `;
