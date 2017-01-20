@@ -372,6 +372,9 @@ qq.s3.util = qq.s3.util || (function() {
         },
 
         getCredentialsDate: function(date) {
+            if (!date) {
+                date = new Date();
+            }
             return date.getUTCFullYear() + "" +
                 ("0" + (date.getUTCMonth() + 1)).slice(-2) +
                 ("0" + date.getUTCDate()).slice(-2);
