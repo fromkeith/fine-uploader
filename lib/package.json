@@ -63,5 +63,8 @@
     "build": "make clean; make build-all-ui",
     "lint": "make lint",
     "test": "make lint && make test"
+  },
+  "dependencies": {
+    "crypto-js": "3.1.9-1"
   }
 }
