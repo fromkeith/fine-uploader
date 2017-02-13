@@ -24,12 +24,13 @@ export-file = $(js-src-dir)/export.js
 preamble = "// Fine Uploader $(version) - (c) 2013-present Widen Enterprises, Inc. MIT licensed. http://fineuploader.com"
 
 cryptojs-files = \
-	$(js-3rdparty-src-dir)/crypto-js/core.js \
-	$(js-3rdparty-src-dir)/crypto-js/enc-base64.js \
-	$(js-3rdparty-src-dir)/crypto-js/hmac.js \
-	$(js-3rdparty-src-dir)/crypto-js/sha1.js \
-	$(js-3rdparty-src-dir)/crypto-js/sha256.js \
-	$(js-3rdparty-src-dir)/crypto-js/lib-typedarrays.js
+	node_modules/crypto-js/core.js \
+	node_modules/crypto-js/enc-base64.js \
+	node_modules/crypto-js/hmac.js \
+	node_modules/crypto-js/sha1.js \
+	node_modules/crypto-js/sha256.js \
+	node_modules/crypto-js/lib-typedarrays.js \
+	$(js-3rdparty-src-dir)/crypto-js/adapter.js
 
 jquery-files = \
 	$(js-src-dir)/jquery-plugin.js
