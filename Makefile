@@ -29,8 +29,7 @@ cryptojs-files = \
 	$(build-out-dir)/3rdparty-temp/hmac.js \
 	$(build-out-dir)/3rdparty-temp/sha1.js \
 	$(build-out-dir)/3rdparty-temp/sha256.js \
-	$(build-out-dir)/3rdparty-temp/lib-typedarrays.js \
-	$(js-3rdparty-src-dir)/crypto-js/adapter.js
+	$(build-out-dir)/3rdparty-temp/lib-typedarrays.js
 
 jquery-files = \
 	$(js-src-dir)/jquery-plugin.js
