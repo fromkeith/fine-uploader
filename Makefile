@@ -24,12 +24,12 @@ export-file = $(js-src-dir)/export.js
 preamble = "// Fine Uploader $(version) - (c) 2013-present Widen Enterprises, Inc. MIT licensed. http://fineuploader.com"
 
 cryptojs-files = \
-	node_modules/crypto-js/core.js \
-	node_modules/crypto-js/enc-base64.js \
-	node_modules/crypto-js/hmac.js \
-	node_modules/crypto-js/sha1.js \
-	node_modules/crypto-js/sha256.js \
-	node_modules/crypto-js/lib-typedarrays.js \
+	$(build-out-dir)/3rdparty-temp/core.js \
+	$(build-out-dir)/3rdparty-temp/enc-base64.js \
+	$(build-out-dir)/3rdparty-temp/hmac.js \
+	$(build-out-dir)/3rdparty-temp/sha1.js \
+	$(build-out-dir)/3rdparty-temp/sha256.js \
+	$(build-out-dir)/3rdparty-temp/lib-typedarrays.js \
 	$(js-3rdparty-src-dir)/crypto-js/adapter.js
 
 jquery-files = \
@@ -225,6 +225,7 @@ _build:
 	cp LICENSE $@
 	cp $(src-dir)/*.css $@
 	cp $(src-dir)/*.gif $@
+	node build-clean-cryptojs.js
 	$(npm-bin)/cleancss --source-map $@/fine-uploader.css -o $@/fine-uploader.min.css
 	$(npm-bin)/cleancss --source-map $@/fine-uploader-gallery.css -o $@/fine-uploader-gallery.min.css
 	$(npm-bin)/cleancss --source-map $@/fine-uploader-new.css -o $@/fine-uploader-new.min.css
