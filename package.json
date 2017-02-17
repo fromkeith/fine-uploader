@@ -59,7 +59,7 @@
     "node-static": "0.7.9",
     "pica": "2.0.8",
     "uglify-js": "2.8.3",
-    "timemachine": "^0.2.8"
+    "timemachine": "0.2.8"
   },
   "scripts": {
     "build": "make clean; make build-all-ui",
