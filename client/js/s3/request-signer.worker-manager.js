@@ -20,10 +20,6 @@ qq.s3.RequestSignerWorkerManager = function (o) {
                 if (options.workerUrl !== "inline") {
                     workerUrl = options.workerUrl;
                 } else {
-                    if (!qq.s3.createS3InlineWorkerUrl) {
-                        qq.Error("Missing inline s3 worker");
-                        return;
-                    }
                     workerUrl = qq.s3.createS3InlineWorkerUrl();
                 }
                 break;
