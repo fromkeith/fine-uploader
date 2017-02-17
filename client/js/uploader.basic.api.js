@@ -308,6 +308,10 @@
             return false;
         },
 
+        removeFileRef: function(id) {
+            this._handler.expunge(id);
+        },
+
         reset: function() {
             this.log("Resetting uploader...");
 
@@ -391,6 +395,35 @@
 
         setUuid: function(id, newUuid) {
             return this._uploadData.uuidChanged(id, newUuid);
+        },
+
+        /**
+         * Expose the internal status of a file id to the public api for manual state changes
+         * @public
+         *
+         * @param {Number} id,
+         * @param {String} newStatus
+         *
+         * @todo Implement the remaining methods
+         */
+        setStatus: function(id, newStatus) {
+            var fileRecord = this.getUploads({id: id});
+            if (!fileRecord) {
+                throw new qq.Error(id + " is not a valid file ID.");
+            }
+
+            switch (newStatus) {
+                case qq.status.DELETED:
+                    this._onDeleteComplete(id, null, false);
+                    break;
+                case qq.status.DELETE_FAILED:
+                    this._onDeleteComplete(id, null, true);
+                    break;
+                default:
+                    var errorMessage = "Method setStatus called on '" + name + "' not implemented yet for " + newStatus;
+                    this.log(errorMessage);
+                    throw new qq.Error(errorMessage);
+            }
         },
 
         uploadStoredFiles: function() {
@@ -795,6 +828,9 @@
         },
 
         _formatSize: function(bytes) {
+            if (bytes === 0) {
+                return bytes + this._options.text.sizeSymbols[0];
+            }
             var i = -1;
             do {
                 bytes = bytes / 1000;
@@ -1058,6 +1094,35 @@
                 name: name,
                 blob: blob
             });
+        },
+
+        _handleDeleteSuccess: function(id) {
+            if (this.getUploads({id: id}).status !== qq.status.DELETED) {
+                var name = this.getName(id);
+
+                this._netUploadedOrQueued--;
+                this._netUploaded--;
+                this._handler.expunge(id);
+                this._uploadData.setStatus(id, qq.status.DELETED);
+                this.log("Delete request for '" + name + "' has succeeded.");
+            }
+        },
+
+        _handleDeleteFailed: function(id, xhrOrXdr) {
+            var name = this.getName(id);
+
+            this._uploadData.setStatus(id, qq.status.DELETE_FAILED);
+            this.log("Delete request for '" + name + "' has failed.", "error");
+
+            // Check first if xhrOrXdr is actually passed or valid
+            // For error reporting, we only have access to the response status if this is not
+            // an `XDomainRequest`.
+            if (!xhrOrXdr || xhrOrXdr.withCredentials === undefined) {
+                this._options.callbacks.onError(id, name, "Delete request failed", xhrOrXdr);
+            }
+            else {
+                this._options.callbacks.onError(id, name, "Delete request failed with response code " + xhrOrXdr.status, xhrOrXdr);
+            }
         },
 
         // Creates an extra button element
@@ -1413,24 +1478,10 @@
             var name = this.getName(id);
 
             if (isError) {
-                this._uploadData.setStatus(id, qq.status.DELETE_FAILED);
-                this.log("Delete request for '" + name + "' has failed.", "error");
-
-                // For error reporting, we only have access to the response status if this is not
-                // an `XDomainRequest`.
-                if (xhrOrXdr.withCredentials === undefined) {
-                    this._options.callbacks.onError(id, name, "Delete request failed", xhrOrXdr);
-                }
-                else {
-                    this._options.callbacks.onError(id, name, "Delete request failed with response code " + xhrOrXdr.status, xhrOrXdr);
-                }
+                this._handleDeleteFailed(id, xhrOrXdr);
             }
             else {
-                this._netUploadedOrQueued--;
-                this._netUploaded--;
-                this._handler.expunge(id);
-                this._uploadData.setStatus(id, qq.status.DELETED);
-                this.log("Delete request for '" + name + "' has succeeded.");
+                this._handleDeleteSuccess(id);
             }
         },
 
@@ -1797,7 +1848,7 @@
                 return validityChecker.failure();
             }
 
-            if (size === 0) {
+            if (!this._options.validation.allowEmpty && size === 0) {
                 this._itemError("emptyError", name, file);
                 return validityChecker.failure();
             }
