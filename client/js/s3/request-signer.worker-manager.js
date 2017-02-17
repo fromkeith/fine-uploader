@@ -5,8 +5,8 @@
  */
 qq.s3.RequestSignerWorkerManager = function (o) {
     "use strict";
-    var _worker = null,
-        _workerPromises = {},
+    var worker = null,
+        workerPromises = {},
         options = {
             workerUrl: null,
             log: function(str, level) {}
@@ -37,36 +37,36 @@ qq.s3.RequestSignerWorkerManager = function (o) {
             return;
         }
         try {
-            _worker = new Worker(workerUrl);
-            _worker.onerror = function (e) {
+            worker = new Worker(workerUrl);
+            worker.onerror = function (e) {
                 // Prevent the event from bubbling
                 e.preventDefault();
                 // log the error, and fail any pending promises.
                 options.log("Worker encountered an error. Disabling. " + e.message, "warn");
-                _worker = null;
-                var outstandingRequests = Object.keys(_workerPromises),
+                worker = null;
+                var outstandingRequests = Object.keys(workerPromises),
                     i;
                 for (i = 0; i < outstandingRequests.length; i++) {
-                    _workerPromises[outstandingRequests[i]].failure(e);
-                    delete _workerPromises[outstandingRequests[i]];
+                    workerPromises[outstandingRequests[i]].failure(e);
+                    delete workerPromises[outstandingRequests[i]];
                 }
             };
-            _worker.onmessage = function (e) {
-                if (!_workerPromises[e.data.id]) {
-                    options.log("Worker returned a result for an request we dont know about.");
+            worker.onmessage = function (e) {
+                if (!workerPromises[e.data.id]) {
+                    options.log("Worker returned a result for an request we dont know about.", "warn");
                     return;
                 }
                 if (e.data.err) {
-                    _workerPromises[e.data.id].failure(e.data.err);
+                    workerPromises[e.data.id].failure(e.data.err);
                 } else {
-                    _workerPromises[e.data.id].success(e.data.resp);
+                    workerPromises[e.data.id].success(e.data.resp);
                 }
-                delete _workerPromises[e.data.id];
+                delete workerPromises[e.data.id];
             };
         }  catch (ex) {
             // worker is not supported or invalid
             options.log("Worker failed to be created. Defaulting back to main thread processing." + ex, "warn");
-            _worker = null;
+            worker = null;
         }
     }
     init();
@@ -76,13 +76,13 @@ qq.s3.RequestSignerWorkerManager = function (o) {
         @returns a promise or null if we can't generate signatures at all.
     */
     this.generateSignature = function (file) {
-        if (!_worker) {
+        if (!worker) {
             return null;
         }
         var promise = new qq.Promise(),
             task = {file: file, id: qq.getUniqueId()};
-        _workerPromises[task.id] = promise;
-        _worker.postMessage(task);
+        workerPromises[task.id] = promise;
+        worker.postMessage(task);
         return promise;
     };
 };
