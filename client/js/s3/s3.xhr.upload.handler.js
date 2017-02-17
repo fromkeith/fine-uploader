@@ -11,6 +11,15 @@
 qq.s3.XhrUploadHandler = function(spec, proxy) {
     "use strict";
 
+    // need to pre-construct the workerManager
+    var workerManager;
+    if (spec.signature.workerUrl) {
+        workerManager = new qq.s3.RequestSignerWorkerManager({
+            workerUrl: spec.signature.workerUrl,
+            log: proxy.log,
+        });
+    }
+
     var getName = proxy.getName,
         log = proxy.log,
         clockDrift = spec.clockDrift,
@@ -26,7 +35,7 @@ qq.s3.XhrUploadHandler = function(spec, proxy) {
         region = spec.objectProperties.region,
         serverSideEncryption = spec.objectProperties.serverSideEncryption,
         validation = spec.validation,
-        signature = qq.extend({region: region, drift: clockDrift}, spec.signature),
+        signature = qq.extend({region: region, drift: clockDrift, workerManager: workerManager}, spec.signature),
         handler = this,
         credentialsProvider = spec.signature.credentialsProvider,
 
