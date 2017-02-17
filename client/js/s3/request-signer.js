@@ -33,8 +33,7 @@ qq.s3.RequestSigner = function(o) {
                 credentialsProvider: {},
                 endpoint: null,
                 customHeaders: {},
-                version: 2,
-                workerUrl: null
+                version: 2
             },
             maxConnections: 3,
             endpointStore: {},
@@ -46,7 +45,6 @@ qq.s3.RequestSigner = function(o) {
             log: function(str, level) {}
         },
         credentialsProvider,
-        workerManager,
 
         generateHeaders = function(signatureConstructor, signature, promise) {
             var headers = signatureConstructor.getHeaders();
@@ -159,8 +157,8 @@ qq.s3.RequestSigner = function(o) {
                 if (qq.isBlob(body)) {
                     // We will fallback to the inline reader if the worker was
                     // not loaded correctly
-                    if (workerManager) {
-                        promise = workerManager.generateSignature(body);
+                    if (options.signatureSpec.workerManager) {
+                        promise = options.signatureSpec.workerManager.generateSignature(body);
                         if (promise !== null) {
                             return promise;
                         }
@@ -267,12 +265,6 @@ qq.s3.RequestSigner = function(o) {
 
     qq.extend(options, o, true);
     credentialsProvider = options.signatureSpec.credentialsProvider;
-    if (options.signatureSpec.workerUrl !== null) {
-        workerManager = new qq.s3.RequestSignerWorkerManager({
-            workerUrl: options.signatureSpec.workerUrl,
-            log: options.log,
-        });
-    }
 
     function handleSignatureReceived(id, xhrOrXdr, isError) {
         var responseJson = xhrOrXdr.responseText,
@@ -293,9 +285,14 @@ qq.s3.RequestSigner = function(o) {
             }
         }
 
+        // If the response is parsable and contains an `error` property, use it as the error message
+        if (response && response.error) {
+            isError = true;
+            errorMessage = response.error;
+        }
         // If we have received a parsable response, and it has an `invalid` property,
         // the policy document or request headers may have been tampered with client-side.
-        if (response && response.invalid) {
+        else if (response && response.invalid) {
             isError = true;
             errorMessage = "Invalid policy document or request headers!";
         }

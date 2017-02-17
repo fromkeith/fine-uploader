@@ -1,4 +1,4 @@
-/* globals describe, beforeEach, $fixture, qq, assert, it, qqtest, helpme, purl, Q */
+/* globals describe, beforeEach, $fixture, qq, assert, it, qqtest, helpme, purl, Q, timemachine */
 describe("S3 serverless upload tests", function() {
     "use strict";
 
@@ -71,7 +71,7 @@ describe("S3 serverless upload tests", function() {
                                     "x-amz-date": "20170103T051259Z",
                                     "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
                                     "Content-Type": "image/jpeg;charset=utf-8",
-                                    "Authorization": "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-acl;x-amz-content-sha256;x-amz-date;x-amz-meta-qqfilename,Signature=14fdc2d6a00d17df9567be47a31ca095b80524aeb8e79f3053af043015974430"
+                                    Authorization: "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-acl;x-amz-content-sha256;x-amz-date;x-amz-meta-qqfilename,Signature=14fdc2d6a00d17df9567be47a31ca095b80524aeb8e79f3053af043015974430"
                                 }
                             },
                             response: {
@@ -83,13 +83,13 @@ describe("S3 serverless upload tests", function() {
                                 headers: {
                                     "x-amz-date": "20170103T051259Z",
                                     "x-amz-content-sha256": "f0e8f719522f251f70867928d11d65bcbf411bb90a6b179f59615034deacdef4",
-                                    "Authorization": "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=a877f0f446fc54b72c39d9b880feb835b2067ae44fd88aa06a6ccaef3926e450",
+                                    Authorization: "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=a877f0f446fc54b72c39d9b880feb835b2067ae44fd88aa06a6ccaef3926e450",
                                     "Content-Type": "text/plain;charset=utf-8"
                                 }
                             },
                             response: {
                                 headers: {
-                                    'ETag': '123'
+                                    ETag: "123"
                                 }
                             }
                         },
@@ -98,13 +98,13 @@ describe("S3 serverless upload tests", function() {
                                 headers: {
                                     "x-amz-date": "20170103T051259Z",
                                     "x-amz-content-sha256": "f7cde1a6dc195915c61cb2ecbbd059568fd62ae69b3deec8bb9378d58fb962e1",
-                                    "Authorization": "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=4f27d48c111d977828386fbb68962d9b5ee5693330d21b72bea89c161229b79e",
+                                    Authorization: "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=4f27d48c111d977828386fbb68962d9b5ee5693330d21b72bea89c161229b79e",
                                     "Content-Type": "text/plain;charset=utf-8"
                                 }
                             },
                             response: {
                                 headers: {
-                                    'ETag': '124'
+                                    ETag: "124"
                                 }
                             }
                         },
@@ -113,13 +113,13 @@ describe("S3 serverless upload tests", function() {
                                 headers: {
                                     "x-amz-date": "20170103T051259Z",
                                     "x-amz-content-sha256": "cb132c33557875745102c2b390aac7dcb59ba6f0df972db59aac6bf97c11f195",
-                                    "Authorization": "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=2b66885e1ce095e841d306720e6990bc94871101db301b7e0ea642bc88f8f1f1",
+                                    Authorization: "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=2b66885e1ce095e841d306720e6990bc94871101db301b7e0ea642bc88f8f1f1",
                                     "Content-Type": "text/plain;charset=utf-8"
                                 }
                             },
                             response: {
                                 headers: {
-                                    'ETag': '125'
+                                    ETag: "125"
                                 }
                             }
                         },
@@ -128,13 +128,13 @@ describe("S3 serverless upload tests", function() {
                                 headers: {
                                     "x-amz-date": "20170103T051259Z",
                                     "x-amz-content-sha256": "c560b4f8b54d541e32b42a423ccbb1b43b298e9e0deee5c2c09d1e40ceb70a0b",
-                                    "Authorization": "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=9925d724d5af0f9ac6ede5a32519d98c2e3034e2fff81f01cb0641bd312b6ee4",
+                                    Authorization: "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=9925d724d5af0f9ac6ede5a32519d98c2e3034e2fff81f01cb0641bd312b6ee4",
                                     "Content-Type": "text/plain;charset=utf-8"
                                 }
                             },
                             response: {
                                 headers: {
-                                    'ETag': '126'
+                                    ETag: "126"
                                 }
                             }
                         },
@@ -143,14 +143,14 @@ describe("S3 serverless upload tests", function() {
                                 headers: {
                                     "x-amz-date": "20170103T051259Z",
                                     "x-amz-content-sha256": "065af8ce8639945de4edfed2f9f08a559e4916ff67b96aeaa348ab6dc2bbc9c5",
-                                    "Authorization": "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=4b51bb95b32b33b19ede316192fa5f176e2397e543962f287b4ea6ab217ec9ea",
+                                    Authorization: "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=4b51bb95b32b33b19ede316192fa5f176e2397e543962f287b4ea6ab217ec9ea",
                                     "Content-Type": "application/xml;charset=utf-8"
                                 },
                                 body: "<CompleteMultipartUpload><Part><PartNumber>1</PartNumber><ETag>123</ETag></Part><Part><PartNumber>2</PartNumber><ETag>124</ETag></Part><Part><PartNumber>3</PartNumber><ETag>125</ETag></Part><Part><PartNumber>4</PartNumber><ETag>126</ETag></Part></CompleteMultipartUpload>"
                             },
                             response: {
                                 headers: {
-                                    'ETag': '127'
+                                    ETag: "127"
                                 },
                                 body: "<CompleteMultipartUploadResult><Bucket>mytestbucket</Bucket><Key>test-key</Key></CompleteMultipartUploadResult>"
                             }
@@ -196,11 +196,11 @@ describe("S3 serverless upload tests", function() {
                                 },
                                 signature: {
                                     version: 4,
-                                    workerUrl: 'inline'
+                                    workerUrl: "inline"
                                 },
                                 objectProperties: {
                                     key: function () {
-                                        return 'test-key';
+                                        return "test-key";
                                     }
                                 },
                                 chunking: {
@@ -237,7 +237,7 @@ describe("S3 serverless upload tests", function() {
                                 },
                                 objectProperties: {
                                     key: function () {
-                                        return 'test-key';
+                                        return "test-key";
                                     }
                                 },
                                 chunking: {
@@ -271,11 +271,11 @@ describe("S3 serverless upload tests", function() {
                                 },
                                 signature: {
                                     version: 4,
-                                    workerUrl: 'http://localhost:3000/file.not.exists.js'
+                                    workerUrl: "http://localhost:3000/file.not.exists.js"
                                 },
                                 objectProperties: {
                                     key: function () {
-                                        return 'test-key';
+                                        return "test-key";
                                     }
                                 },
                                 chunking: {
@@ -304,7 +304,7 @@ describe("S3 serverless upload tests", function() {
                         answers.splice(1, 0, {
                             expect: {
                                 headers: {
-                                    'x-amz-date': undefined
+                                    "x-amz-date": undefined
                                 }
                             }
                         });
@@ -332,7 +332,7 @@ describe("S3 serverless upload tests", function() {
                                 },
                                 objectProperties: {
                                     key: function () {
-                                        return 'test-key';
+                                        return "test-key";
                                     }
                                 },
                                 chunking: {
@@ -358,10 +358,10 @@ describe("S3 serverless upload tests", function() {
                         for (var i = 1; i < answers.length - 1; i++) {
                             answers[i].expect.headers["x-amz-content-sha256"] = "00000000002f251f70867928d11d65bcbf411bb90a6b179f59615034deacdef4";
                         }
-                        answers[1].expect.headers["Authorization"] = "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=e563897a58bc1841481737424d81f2401ae7ba527f925285622459ab97753128";
-                        answers[2].expect.headers["Authorization"] = "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=a5956265f51d6039c8dd0df42ddef5a4bdfc8fc1b65812d6a4d55d121f3952dc";
-                        answers[3].expect.headers["Authorization"] = "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=56f2da2ee333edb6d96d116ef9ea046ff2c4648e7117f2c1b6475f2dd572530a";
-                        answers[4].expect.headers["Authorization"] = "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=6bbd9cbca147eab277bf18138961e43e309d08a10d13e5afd2d4b3ba51d08ad1";
+                        answers[1].expect.headers.Authorization = "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=e563897a58bc1841481737424d81f2401ae7ba527f925285622459ab97753128";
+                        answers[2].expect.headers.Authorization = "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=a5956265f51d6039c8dd0df42ddef5a4bdfc8fc1b65812d6a4d55d121f3952dc";
+                        answers[3].expect.headers.Authorization = "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=56f2da2ee333edb6d96d116ef9ea046ff2c4648e7117f2c1b6475f2dd572530a";
+                        answers[4].expect.headers.Authorization = "AWS4-HMAC-SHA256 Credential=testAccessKey/20170103/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=6bbd9cbca147eab277bf18138961e43e309d08a10d13e5afd2d4b3ba51d08ad1";
                         doTest(uploader, answers);
                     });
                 });
