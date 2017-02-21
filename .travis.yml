@@ -1,6 +1,6 @@
 addons:
   firefox: latest
-sudo: false
+sudo: required
 language: node_js
 node_js:
 - 5.0.0
@@ -20,7 +20,7 @@ env:
 before_script:
 - sh -e /etc/init.d/xvfb start
 after_success:
-- make install-docfu
+- sudo make install-docfu
 - git config user.email fineuploader-docs-bot@raynicholus.com
 - git config user.name fineuploader-docs-bot
 - make docs-travis
