@@ -19,4 +19,4 @@ before_script:
 - sh -e /etc/init.d/xvfb start
 script:
 - npm test
-- if [ $TRAVIS_TEST_RESULT -eq 0 ]; make docs-travis; fi;
+- if [ $TRAVIS_TEST_RESULT -eq 0 ]; then make docs-travis; fi
