@@ -12,7 +12,7 @@ env:
   - secure: nDapj/IyKyPhcD6eHWqd3YnydZ3AHZDeiuAxgBOiYllSZ5AxlTahET0MX58rRp+8RsvNCZ4EBbEQ2u7I4JoqAwGyx8LhwA0q64ZQ7xI7RSHttgN289Xt4V4NEjUv1ObJgRxfXKqMbpHvU+0CVGdXunB4inconN6dOIXfGsq4HaM=
 install:
   - . $HOME/.nvm/nvm.sh
-  - nvm install stable
+  - nvm install 5.0.0
   - nvm use 5.0.0
   - npm install
 before_script:
