@@ -8,7 +8,7 @@ env:
   global:
   - DISPLAY=:99.0
   # fineuploader-docs-bot access token:
-  - secure: JC5ts+0e0nXiDmM0cCWdSGh0Pc+3QllhMK2wjLtsywIB+X6f8olUIY/sFVMScOu6+cK6GTvJTqtMPRGuZtIYajIUPqQkWzlGkaXbzGUsDMlCzSuOGj933unKBYZ1IxsWqxLtJP63OvMwcGMRndlIIzhIiwYI8kY4ZFRrmZPoxj+3RlBq+Wwtf0G1zZcrnX0WNOfRoz+4HWrhoiWW5sOgTkdsqrzW/RmOcSVuErAME/TEbA5CFg3mjaeNT2cR7TIgOnBhIgUVxfllVup0q7FtrHQ7Y/KGfxvIByJisvXvQUgA7iTCkiEIoC1edg/JJiNm79tosnhEYphi/pTwRH2UnUgAMLq3pm1CPPhaLqDVBxfvMVBih/ZxUGPs5v1PMzp0edHJsYQuYLeTogwN3XplO5E2us62JHK0TdTWibxdl9Vbexa5a9qbYT8IMp9d/jzmDF0yupOxb/XBpV4adWXq1XlDJ+Z+sHlu8YX309cwSI/kFGct4DdYT2r77IbwgrIO1J03lK5m7D2SMsdbYelk/Y+DjI5Lf1Vry6gmo2em4TG91nd5a67MeGpUL9a3xewGricm15GSAqN9YvdYipN43cyUyWVlfOrUd1v+SlwS+KjR6BypEKFT64aumvY95VURMbRhEOJMANltP6mMjtSpMa+IJmZYutg9r4OAp4xUzn0=
+  - secure: VivYvunE/CR/eHQIWjE4sqgj9ZFydBj/+5l78ivyWxxdqyeUyuDx8Nv3ZpmYyCBU/V9g9FCXxlGmnQrF41ibIST/V0ogW0k2SkI+8onZogmoqDpYjuwgsj0IcbmIviY6NtQ88B4VaL9ynQKMBSAfKUuiL1okqoLHnfyPN33UdBk=
 before_script:
 - sh -e /etc/init.d/xvfb start
 after_success:
