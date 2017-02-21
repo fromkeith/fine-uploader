@@ -7,8 +7,9 @@ node_js:
 env:
   global:
   - DISPLAY=:99.0
+  - DOCS_GH_REF: github.com/FineUploader/docs.fineuploader.com
   # fineuploader-docs-bot access token:
-  - secure: VivYvunE/CR/eHQIWjE4sqgj9ZFydBj/+5l78ivyWxxdqyeUyuDx8Nv3ZpmYyCBU/V9g9FCXxlGmnQrF41ibIST/V0ogW0k2SkI+8onZogmoqDpYjuwgsj0IcbmIviY6NtQ88B4VaL9ynQKMBSAfKUuiL1okqoLHnfyPN33UdBk=
+  - secure: nDapj/IyKyPhcD6eHWqd3YnydZ3AHZDeiuAxgBOiYllSZ5AxlTahET0MX58rRp+8RsvNCZ4EBbEQ2u7I4JoqAwGyx8LhwA0q64ZQ7xI7RSHttgN289Xt4V4NEjUv1ObJgRxfXKqMbpHvU+0CVGdXunB4inconN6dOIXfGsq4HaM=
 before_script:
 - sh -e /etc/init.d/xvfb start
 after_success:
