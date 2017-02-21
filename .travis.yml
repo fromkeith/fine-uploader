@@ -12,8 +12,6 @@ env:
   - secure: nDapj/IyKyPhcD6eHWqd3YnydZ3AHZDeiuAxgBOiYllSZ5AxlTahET0MX58rRp+8RsvNCZ4EBbEQ2u7I4JoqAwGyx8LhwA0q64ZQ7xI7RSHttgN289Xt4V4NEjUv1ObJgRxfXKqMbpHvU+0CVGdXunB4inconN6dOIXfGsq4HaM=
 before_script:
 - sh -e /etc/init.d/xvfb start
-after_success:
-- sudo make install-docfu
-- git config --global user.email "fineuploader-docs-bot@raynicholus.com"
-- git config --global user.name "fineuploader-docs-bot"
-- make docs-travis
+script:
+- npm test
+- if [ $TRAVIS_TEST_RESULT -eq 0 ]; make docs-travis; fi

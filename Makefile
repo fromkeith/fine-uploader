@@ -414,6 +414,9 @@ docs:
 .PHONY: docs
 
 docs-travis:
+	sudo make install-docfu
+	git config --global user.email "fineuploader-docs-bot@raynicholus.com"
+	git config --global user.name "fineuploader-docs-bot"
 ifdef TRAVIS_TAG
 	make docs type=tag type-value=$(TRAVIS_TAG)
 else ifdef TRAVIS_BRANCH
