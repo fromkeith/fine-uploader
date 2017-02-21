@@ -404,7 +404,9 @@ copy-azure-jquery-dist:
 copy-all-dist:
 	make copy-build-to-dist PUB-SUBDIR=all.fine-uploader
 
-docs:
+docs: install-docfu
+	git config --global user.email "fineuploader-docs-bot@raynicholus.com"
+	git config --global user.name "fineuploader-docs-bot"
 	docfu --$(type) "$(type-value)" "FineUploader/fine-uploader" "docfu-temp"
 	git clone --depth 1 https://github.com/FineUploader/docs.fineuploader.com.git
 	cp -pR docfu-temp/$(type) docs.fineuploader.com/
@@ -414,15 +416,12 @@ docs:
 .PHONY: docs
 
 docs-travis:
-	make install-docfu
-	git config --global user.email "fineuploader-docs-bot@raynicholus.com"
-	git config --global user.name "fineuploader-docs-bot"
-ifdef TRAVIS_TAG
-	make docs type=tag type-value=$(TRAVIS_TAG)
-else ifdef TRAVIS_BRANCH
-	make docs type=branch type-value=$(TRAVIS_BRANCH)
-else
+ifneq ($(TRAVIS_PULL_REQUEST), false)
 	@echo skipping docs build - not a non-PR or tag push
+else ifdef TRAVIS_TAG
+	make docs type=tag type-value=$(TRAVIS_TAG)
+else
+	make docs type=branch type-value=$(TRAVIS_BRANCH)
 endif
 .PHONY: docs-travis
 
