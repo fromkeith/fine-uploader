@@ -1,17 +1,22 @@
 addons:
   firefox: latest
-sudo: required
-language: node_js
-node_js:
-- 5.0.0
+sudo: false
+language: python
+python:
+- 2.7
 env:
   global:
   - DISPLAY=:99.0
   - DOCS_GH_REF: github.com/FineUploader/docs.fineuploader.com
   # fineuploader-docs-bot access token:
   - secure: nDapj/IyKyPhcD6eHWqd3YnydZ3AHZDeiuAxgBOiYllSZ5AxlTahET0MX58rRp+8RsvNCZ4EBbEQ2u7I4JoqAwGyx8LhwA0q64ZQ7xI7RSHttgN289Xt4V4NEjUv1ObJgRxfXKqMbpHvU+0CVGdXunB4inconN6dOIXfGsq4HaM=
+install:
+  - . $HOME/.nvm/nvm.sh
+  - nvm install stable
+  - nvm use 5.0.0
+  - npm install
 before_script:
 - sh -e /etc/init.d/xvfb start
 script:
 - npm test
-- if [ $TRAVIS_TEST_RESULT -eq 0 ]; make docs-travis; fi
+- if [ $TRAVIS_TEST_RESULT -eq 0 ]; make docs-travis; fi;
