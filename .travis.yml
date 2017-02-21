@@ -1,13 +1,9 @@
----
 addons:
-  firefox: "latest"
-
+  firefox: latest
 sudo: false
 language: node_js
-
 node_js:
-- '5.0.0'
-
+- 5.0.0
 env:
   global:
   - DISPLAY=:99.0
@@ -19,6 +15,12 @@ env:
       sEQ0OSwK/9SUqLXB+w8n9oEdFEdLxZTBdMhC5fUrsCjgstfUSSgzYOT9cTFp
       awR42/q/Akos2eA8NWx5yU+hRC5rr+oQG5Eio0tzi9+y3a6VXDvgS1h2SaQz
       TR/MjA/29gFvV7bnp1LSs2TdZx+NGhLd4zHv01XZ+pQk/nQiW9w=
-
+  - secure: LtFr+fbS9qHzNJyq9s2fCT085vuidM2lL7s55rHuoyrSyf2wc8Ei34yjT4gCT3hJZ/gQgS6ooXL3KHhZZNvqTiOKrYzgrC9zTyMUzIdfEZDS2hZJSdbr8C2I76z/a4BnP4QFV6z3cxpely9c98pP5i3sXgD3xWxT71n6MWiwe3I9aFbDaWULZXe+qmio6Tb0/yUhbnq5UPQb7VczAiRlPioGuEfarjixcSw7DqRCVFNwPhgZ9qUwo5bM3COXIU8Qfsk0QTtRL+75qr+gUWlDQL18cXb01a5LKDsMvNBWrVJxfqK2E5MW/BKfjDUn6tv9bHAZlRFQIv6700PvN1mFX/G9ZXyR2IdD90oXDogVxo0piJyc8GaXu5NKdk8bTTKJzv7UoFXoWJpltdSEzC7tDQTbqY1IA1ybeBliSLVbOXSn/JDd2clb9ilNB0o9/IO38qMJWcvZ6UOqKT7IZOtk43Jsudkks3fRiZoGNbM8hv1+okhkDdbGBmRme+1uGmc2Pff2rugQJlwVty6GXY3/tp4REeVrSsCtsL52dcMTYNtuadW21H27U66dt9REYkFi5jmuZFcWHvpLByXQ2UET3kmSJ1FPmveY3u63yXLrphN9Lqsu2Wg1kRGTfinTPuKmY8jQbhcK95mWAdgNaCDnFch4zzCd8svICSOfcTeQUPY=
+  - secure: AakAOjAe227DabsZu1rFsok5eS2dosd0cdkfp97k2qf/2QqxjdioU5kZFnw/y6glp9TsS5YGYcQqHjVlXPv9wyODyrfmsJx6lStxJxtiOsIzUZ/TjjwH2UrhOHKxDZrC1CAABiNrJ+ZVnR62CeH1L8OJz3nEyg6s0MfmF9jgL3qmuZBMH06sOUjmk7ldOxPO3dDvz3h6KkcIKfwcxALf8ZU1Zl1w0eGBkqy9l5gzEadgfnXqtzWQAUw5f+VypVBgpRYtExAmcbTt/RsUW12xEtRhnDJus7NW9Oag1Z1b1qkTEysX0jAgKK+oXFXg4Gohnl3+QqnRJWyGmEqDIXh0/dlzVcbAHkgRk74snmwYcwCX/B9654r6/kCs+Mf9NPVK1naVTD9JIGQQxA3iuzFlzZhn+FwdXIV5Ql9nI9OCeRZHLYHNawEkgQqAPgouaSZ0ljWfnIfQREM2GBCfT47wIJiQErFvgi/1JoTxociBzXkXR84aO+qn7oAJPz00t3ooiXafmBiC8onSJRIYuCtG0Q40DUK6/DtXchMQio0bRKMVYADhH82RQOyG/FFqoQVKxqEID6vA/r1ge98a/Bm75w37cn4j0T7gtaJwbsdPmlhzl7fHaVVuTIM0LcU9YSSZZ67Z0EdeROVtOVcwG5GMujapkt62iM4kj4UyqIr8+Oc=
 before_script:
-- "sh -e /etc/init.d/xvfb start"
+- sh -e /etc/init.d/xvfb start
+after_success:
+- make install-docfu
+- git config user.email fineuploader-docs-bot@raynicholus.com
+- git config user.name fineuploader-docs-bot
+- make docs-travis
