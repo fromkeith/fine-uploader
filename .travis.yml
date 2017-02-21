@@ -14,5 +14,5 @@ before_script:
 after_success:
 - sudo make install-docfu
 - git config --global user.email "fineuploader-docs-bot@raynicholus.com"
-- git config --global user.name "fineuploader-docs-bot
+- git config --global user.name "fineuploader-docs-bot"
 - make docs-travis
