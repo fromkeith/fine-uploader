@@ -217,7 +217,9 @@
                 return {
                     get: function(id) {
                         var endpoint = super_.get(id);
-
+                        if (typeof endpoint === 'function') {
+                            endpoint = endpoint(id);
+                        }
                         if (endpoint.indexOf("http") < 0) {
                             return "http://" + endpoint;
                         }

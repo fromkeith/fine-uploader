@@ -477,6 +477,9 @@ qq.s3.RequestSigner = function(o) {
         contentType: "application/json; charset=utf-8",
         endpointStore: {
             get: function() {
+                if (typeof options.signatureSpec.endpoint === 'function') {
+                    return options.signatureSpec.endpoint();
+                }
                 return options.signatureSpec.endpoint;
             }
         },

@@ -486,6 +486,55 @@ describe("S3 serverless upload tests", function() {
                 });
             });
 
+            it("test endpoint as a function", function(done) {
+                assert.expect(14, done);
+
+                var overrideEndpoint = 'https://different-bucket.s3.amazonaws.com';
+                var testExpiration = new Date(Date.now() + 10000),
+                    uploader = new qq.s3.FineUploaderBasic({
+                        request: {
+                            endpoint: function () {
+                                return overrideEndpoint;
+                            }
+                        }
+                    });
+
+                uploader.setCredentials({
+                    accessKey: testAccessKey,
+                    secretKey: testSecretKey,
+                    expiration: testExpiration,
+                    sessionToken: testSessionToken
+                });
+
+                qqtest.downloadFileAsBlob("up.jpg", "image/jpeg").then(function (blob) {
+                    var request, requestParams;
+
+                    fileTestHelper.mockXhr();
+                    uploader.addFiles({name: "test", blob: blob});
+
+                    assert.equal(fileTestHelper.getRequests().length, 1, "Wrong # of requests");
+
+                    request = fileTestHelper.getRequests()[0];
+                    requestParams = request.requestBody.fields;
+
+                    assert.equal(request.url, overrideEndpoint);
+                    assert.equal(request.method, "POST");
+
+                    assert.equal(requestParams["Content-Type"], "image/jpeg");
+                    assert.equal(requestParams.success_action_status, 200);
+                    assert.equal(requestParams[qq.s3.util.SESSION_TOKEN_PARAM_NAME], testSessionToken);
+                    assert.equal(requestParams["x-amz-storage-class"], null);
+                    assert.equal(requestParams["x-amz-meta-qqfilename"], "test");
+                    assert.equal(requestParams.key, uploader.getKey(0));
+                    assert.equal(requestParams.AWSAccessKeyId, testAccessKey);
+                    assert.equal(requestParams.acl, "private");
+                    assert.ok(requestParams.file);
+
+                    assert.ok(requestParams.signature);
+                    assert.ok(requestParams.policy);
+                });
+            });
+
             describe("test credentialsExpired callback", function() {
                 var testExpiration = new Date(Date.now() - 1000),
                     testAccessKeyFromCallback = "testAccessKeyFromCallback",
