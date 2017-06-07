@@ -269,9 +269,15 @@ qq.s3.RequestSigner = function(o) {
     function handleSignatureReceived(id, xhrOrXdr, isError) {
         var responseJson = xhrOrXdr.responseText,
             pendingSignatureData = pendingSignatures[id],
-            promise = pendingSignatureData.promise,
-            signatureConstructor = pendingSignatureData.signatureConstructor,
+            promise,
+            signatureConstructor,
             errorMessage, response;
+
+        if (!pendingSignatureData) {
+            return;
+        }
+        promise = pendingSignatureData.promise;
+        signatureConstructor = pendingSignatureData.signatureConstructor;
 
         delete pendingSignatures[id];
 
@@ -521,6 +527,12 @@ qq.s3.RequestSigner = function(o) {
             else {
                 options.log("Submitting S3 signature request for " + id);
 
+                // create before incase the singature effort returns faster than us
+                pendingSignatures[id] = {
+                    promise: signatureEffort,
+                    signatureConstructor: signatureConstructor
+                };
+
                 if (signatureConstructor) {
                     signatureConstructor.getToSign(id).then(function(signatureArtifacts) {
                         params = {headers: signatureArtifacts.stringToSignRaw};
@@ -539,11 +551,6 @@ qq.s3.RequestSigner = function(o) {
                         .withQueryParams(queryParams)
                         .send();
                 }
-
-                pendingSignatures[id] = {
-                    promise: signatureEffort,
-                    signatureConstructor: signatureConstructor
-                };
             }
 
             return signatureEffort;
