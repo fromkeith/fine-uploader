@@ -535,6 +535,152 @@ describe("S3 serverless upload tests", function() {
                 });
             });
 
+            describe("test chunk retry edge cases", function () {
+                it.only("gets a signature response back before we have hashed the chunk", function (done) {
+                    var testExpiration = new Date(Date.now() - 1000);
+                    // takes a long time to return the result
+                    var fakeSignatureWorker = "var i = 0;" +
+                        "onmessage = function (e) { i++;" +
+                            "setTimeout(function () {postMessage({resp: '00000000002f251f70867928d11d65bcbf411bb90a6b179f59615034deacdef4', id: e.data.id});}, i > 2 ? 10000: 0)" +
+                        "};";
+                    var uploader = new qq.s3.FineUploaderBasic({
+                        request: {
+                            endpoint: testS3Endpoint
+                        },
+                        signature: {
+                            version: 4,
+                            workerUrl: function () {
+                                return URL.createObjectURL(new Blob([fakeSignatureWorker], {type: "application/javascript"}));
+                            }
+                        },
+                        objectProperties: {
+                            key: function () {
+                                return "test-key";
+                            }
+                        },
+                        chunking: {
+                            enabled: true,
+                            partSize: 1024,
+                            concurrent: {
+                                enabled: true
+                            }
+                        },
+                        maxConnections: 2,
+                        credentials: {
+                            accessKey: testAccessKey,
+                            expiration: testExpiration
+                        },
+                        retry: {
+                            enableAuto: true,
+                            autoAttemptDelay: 0,
+                            maxAutoAttempts: 1
+                        },
+                        callbacks: {
+                            onAutoRetry: function () {
+                                console.log('auto-retry');
+                            },
+                            onAllComplete: function(succeeded, failed) {
+                                console.log('all completed')
+                                if (failed && failed.length > 0) {
+                                    done(new Error('failed has length > 0'));
+                                }
+                                done();
+                            },
+                        }
+                    });
+                    // our plan is
+                    //  1. start upload of the file
+                    //  2. wait until at least 2 chunks have been requested (a)
+                    //  3. fail the 1st one (1a), but hold onto the 2nd one (2a).
+                    //  4. wait for auto-retry to trigger, where it resubmits 1 & 2. (b)
+                    //  5. resolve the (2a)
+                    //  6. Old code: error. New code, good.
+                    //
+                    // start the test
+                    var testHelper = {
+                        a: [null, null],
+                        b: [null, null]
+                    };
+                    function handleChunk(which) {
+                        return function () {
+                            var requests = fileTestHelper.getRequests();
+                            console.log('which', which, requests.length);
+                            if (which >= requests.length) {
+                                return;
+                            }
+                            var request = requests[which];
+                            console.log('\t', request.host, request.url, request.requestHeaders, request.status)
+                            //if (!request.url) {
+                            //    setTimeout(handleChunk(which + 1), 100);
+                            //    return;
+                            //}
+                            switch (which) {
+                            case 0: // initiate multipart request (signature)
+                                request.respond(200, {}, "{\"signature\": \"asdasdasda\"} ");
+                                break;
+                            case 1: // initiate multipart request (actual)
+                                request.respond(200, {}, "<UploadId>123</UploadId>");
+                                break;
+                            case 2:
+                                // keep a hold of the upload request to s3
+                                // we will later fail this request with a 500
+                                // NOTE: this request has not been 'made' yet, just created.
+                                // the signuture request will need to be sent out first
+                                testHelper.a[0] = request;
+                                break;
+                            case 3:
+                                // ignore this upload request to s3, we don't care for this test
+                                break;
+                            case 4:
+                                // sign the first chunk for case which = 2
+                                request.respond(200, {}, "{\"signature\": \"asdasdasda\"} ");
+                                break;
+                            case 5:
+                                // hold onto the signature request for for which = 3
+                                testHelper.a[1] = request;
+                                // now lets fail upload for which = 2
+                                setTimeout(function () {
+                                    // fail the upload request we got earlier with 500
+                                    testHelper.a[0].respond(500, {}, "<Error><Code>InternalError</Code><Message>InternalError</Message><Resource>/mybucket/myfoto.jpg</Resource> <RequestId>4442587FB7D0A2F9</RequestId></Error>");
+                                    setTimeout(handleChunk(which + 1), 100);
+                                }, 100);
+                                return;
+                            case 6:
+                                // the auto retry kicks in
+                                // this is, like before, an upload request to s3 for the 1st chunk
+                                // that is not yet 'made', just created
+                                testHelper.b[0] = request;
+                                break;
+                            case 7:
+                                // now we get the upload request for the second chunk,
+                                // but like before, this is not yet 'made', just created
+                                testHelper.b[1] = request;
+                                // lets jump back to which = 5's request.
+                                // lets respond with a success message
+                                // This will trigger our bug (date is undefined)
+                                testHelper.a[1].respond(200, {}, "{\"signature\": \"asdasdasda\"} "); //{ETag: "124"}, "")
+                                break;
+                            case 8:
+                                console.log('reqboy', request.requestBody);
+                                break;
+                            case 9:
+                                console.log('reqboy', request.requestBody);
+                                break;
+                            }
+                            setTimeout(handleChunk(which + 1), 100);
+                        };
+                    }
+                    qqtest.downloadFileAsBlob("up.jpg", "image/jpeg").then(function (blob) {
+                        var request, requestParams;
+
+                        fileTestHelper.mockXhr();
+                        uploader.addFiles({name: "test", blob: blob});
+                        handleChunk(0)();
+                    });
+                });
+
+            });
+
             describe("test credentialsExpired callback", function() {
                 var testExpiration = new Date(Date.now() - 1000),
                     testAccessKeyFromCallback = "testAccessKeyFromCallback",
