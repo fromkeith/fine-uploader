@@ -50,19 +50,24 @@ qq.s3.RequestSigner = function(o) {
             var headers = signatureConstructor.getHeaders();
 
             if (options.signatureSpec.version === 4) {
-                headers.Authorization = qq.s3.util.V4_ALGORITHM_PARAM_VALUE +
-                    " Credential=" + options.signatureSpec.credentialsProvider.get().accessKey + "/" +
-                    qq.s3.util.getCredentialsDate(signatureConstructor.getRequestDate()) + "/" +
-                    options.signatureSpec.region + "/" +
-                    "s3/aws4_request," +
-                    "SignedHeaders=" + signatureConstructor.getSignedHeaders() + "," +
-                    "Signature=" + signature;
+                signatureConstructor.getToSignPromise.then(function () {
+                    headers.Authorization = qq.s3.util.V4_ALGORITHM_PARAM_VALUE +
+                        " Credential=" + options.signatureSpec.credentialsProvider.get().accessKey + "/" +
+                        qq.s3.util.getCredentialsDate(signatureConstructor.getRequestDate()) + "/" +
+                        options.signatureSpec.region + "/" +
+                        "s3/aws4_request," +
+                        "SignedHeaders=" + signatureConstructor.getSignedHeaders() + "," +
+                        "Signature=" + signature;
+                    promise.success(headers, signatureConstructor.getEndOfUrl());
+                }, function () {
+                    promise.failure("Failed to sign chunk");
+                });
             }
             else {
                 headers.Authorization = "AWS " + options.signatureSpec.credentialsProvider.get().accessKey + ":" + signature;
+                promise.success(headers, signatureConstructor.getEndOfUrl());
             }
 
-            promise.success(headers, signatureConstructor.getEndOfUrl());
         },
 
         v2 = {
@@ -318,7 +323,6 @@ qq.s3.RequestSigner = function(o) {
             isError = true;
             errorMessage = "Received an empty or invalid response from the server!";
         }
-
         if (isError) {
             if (errorMessage) {
                 options.log(errorMessage, "error");
@@ -599,6 +603,7 @@ qq.s3.RequestSigner = function(o) {
                     if (sessionToken) {
                         headers[qq.s3.util.SESSION_TOKEN_PARAM_NAME] = sessionToken;
                     }
+                    this.getToSignPromise = promise;
 
                     getStringToSignArtifacts(id, options.signatureSpec.version, {
                         bucket: bucket,
