@@ -536,12 +536,13 @@ describe("S3 serverless upload tests", function() {
             });
 
             describe("test chunk retry edge cases", function () {
-                it.only("gets a signature response back before we have hashed the chunk", function (done) {
+                it("gets a signature response back before we have hashed the chunk", function (done) {
+                    this.timeout(5 * 1000);
                     var testExpiration = new Date(Date.now() - 1000);
                     // takes a long time to return the result
                     var fakeSignatureWorker = "var i = 0;" +
                         "onmessage = function (e) { i++;" +
-                            "setTimeout(function () {postMessage({resp: '00000000002f251f70867928d11d65bcbf411bb90a6b179f59615034deacdef4', id: e.data.id});}, i > 2 ? 10000: 0)" +
+                            "setTimeout(function () {postMessage({resp: '00000000002f251f70867928d11d65bcbf411bb90a6b179f59615034deacdef4', id: e.data.id});}, i > 2 ? 200: 0)" +
                         "};";
                     var uploader = new qq.s3.FineUploaderBasic({
                         request: {
@@ -577,10 +578,8 @@ describe("S3 serverless upload tests", function() {
                         },
                         callbacks: {
                             onAutoRetry: function () {
-                                console.log('auto-retry');
                             },
                             onAllComplete: function(succeeded, failed) {
-                                console.log('all completed')
                                 if (failed && failed.length > 0) {
                                     done(new Error('failed has length > 0'));
                                 }
@@ -588,32 +587,34 @@ describe("S3 serverless upload tests", function() {
                             },
                         }
                     });
-                    // our plan is
-                    //  1. start upload of the file
-                    //  2. wait until at least 2 chunks have been requested (a)
-                    //  3. fail the 1st one (1a), but hold onto the 2nd one (2a).
-                    //  4. wait for auto-retry to trigger, where it resubmits 1 & 2. (b)
-                    //  5. resolve the (2a)
-                    //  6. Old code: error. New code, good.
-                    //
-                    // start the test
+                    // help us keep track of requests
                     var testHelper = {
                         a: [null, null],
-                        b: [null, null]
+                        b: [null, null],
+                        c: [null, null]
                     };
+                    /*
+                        each iteration of requests we handle.
+                        which keeps track of our index.
+                        the basic ordering of requests are
+                            0. sign initiate multipart request.
+                            1. s3 -> initiate multipart request.
+                            2. create the s3 request to upload the 1st chunk. Do not send it yet.
+                            3. create the s3 request to upload the 2nd chunk. Do not send it yet.
+                            4. get the signature for the 1st chunk.
+                            5. get the signature for the 2nd chunk. <- this is where we will cause #2 to fail
+                            6. auto retry kicks in. it does #2 again
+                            7. auto retry causes us to do #3 again. <- this is where we will trigger the bug
+                            8. if we get here, then we have passed! woo. just follow the happy path.
+                    */
                     function handleChunk(which) {
                         return function () {
                             var requests = fileTestHelper.getRequests();
-                            console.log('which', which, requests.length);
                             if (which >= requests.length) {
+                                setTimeout(handleChunk(which), 100);
                                 return;
                             }
                             var request = requests[which];
-                            console.log('\t', request.host, request.url, request.requestHeaders, request.status)
-                            //if (!request.url) {
-                            //    setTimeout(handleChunk(which + 1), 100);
-                            //    return;
-                            //}
                             switch (which) {
                             case 0: // initiate multipart request (signature)
                                 request.respond(200, {}, "{\"signature\": \"asdasdasda\"} ");
@@ -629,10 +630,10 @@ describe("S3 serverless upload tests", function() {
                                 testHelper.a[0] = request;
                                 break;
                             case 3:
-                                // ignore this upload request to s3, we don't care for this test
+                                // ignore this upload request to s3, we don't care about it for this request
                                 break;
                             case 4:
-                                // sign the first chunk for case which = 2
+                                // sign the first chunk for (which = 2)
                                 request.respond(200, {}, "{\"signature\": \"asdasdasda\"} ");
                                 break;
                             case 5:
@@ -657,17 +658,57 @@ describe("S3 serverless upload tests", function() {
                                 testHelper.b[1] = request;
                                 // lets jump back to which = 5's request.
                                 // lets respond with a success message
+                                // ----
                                 // This will trigger our bug (date is undefined)
-                                testHelper.a[1].respond(200, {}, "{\"signature\": \"asdasdasda\"} "); //{ETag: "124"}, "")
+                                // ----
+                                testHelper.a[1].respond(200, {}, "{\"signature\": \"asdasdasda\"} ");
                                 break;
+                            // ---
+                            // Every case forward is the happy success path.
+                            // ---
                             case 8:
-                                console.log('reqboy', request.requestBody);
+                                // sign the first chunk
+                                request.respond(200, {}, "{\"signature\": \"asdasdasda\"} ");
                                 break;
                             case 9:
-                                console.log('reqboy', request.requestBody);
+                                request.respond(200, {}, "{\"signature\": \"asdasdasda\"} ");
+                                setTimeout(function () {
+                                    // resolve the uploads
+                                    testHelper.b[0].respond(200, {ETag: '123'}, "");
+                                    testHelper.b[1].respond(200, {ETag: '123'}, "");
+                                });
+                                setTimeout(handleChunk(which + 1), 100);
+                                return;
+                            case 10:
+                                // more uploads (success path)
+                                testHelper.c[0] = request;
                                 break;
+                            case 11:
+                                // more uploads (success path)
+                                testHelper.c[1] = request;
+                                break;
+                            case 12:
+                                request.respond(200, {}, "{\"signature\": \"asdasdasda\"} ");
+                                break;
+                            case 13:
+                                request.respond(200, {}, "{\"signature\": \"asdasdasda\"} ");
+                                setTimeout(function () {
+                                    // resolve the uploads
+                                    testHelper.c[0].respond(200, {ETag: '123'}, "");
+                                    testHelper.c[1].respond(200, {ETag: '123'}, "");
+                                });
+                                setTimeout(handleChunk(which + 1), 100);
+                                return;
+                            case 14:
+                                // signature for finalize
+                                request.respond(200, {}, "{\"signature\": \"asdasdasda\"} ");
+                                break;
+                            case 15:
+                                // complete it
+                                request.respond(200, {ETag: '123'}, '<CompleteMultipartUploadResult><Bucket>mytestbucket</Bucket><Key>test-key</Key></CompleteMultipartUploadResult>');
+                                return;
                             }
-                            setTimeout(handleChunk(which + 1), 100);
+                            setTimeout(handleChunk(which + 1), 50);
                         };
                     }
                     qqtest.downloadFileAsBlob("up.jpg", "image/jpeg").then(function (blob) {
